@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 var app = express();
 var router = express.Router();
 var moment = require('moment-timezone');
+// assert variable required for latest update query to work
+var assert = require('assert');
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 
@@ -19,6 +21,20 @@ var MongoClient = mongodb.MongoClient;
 
 // Connection URL. This is where your mongodb server is running.
 var url = 'mongodb://localhost:27017/snowapi';
+
+// this SHOULD find all instances where the subject EQUALS the string we are looking for
+var findLatestUpdate = function(db, callback) {
+	var cursor = db.collection('notifications').find( { "subject": "Fwd: City of Eau Claire, Wisconsin: Alternate Side Parking in Effect" } );
+	cursor.each (function(err, doc) {
+		assert.equal(err, null );
+		if (doc != null) {
+			console.log("Ryan's Code");
+			console.dir(doc);
+		} else { 
+			callback();	
+		}
+	});
+};
 
 // Method to connect to, use the database in the callback, and close the connection
 // Callback is passed two parameters
@@ -40,6 +56,9 @@ var useDb = function(callback) {
 				console.log('Connection closed');
 			});
 		}
+		// this calls the function that I wrote down below to retrieve the record with the subject line we are looking for.
+		assert.equal(null, err );
+		findLatestUpdate(db, function() { db.close(); });	
 	});
 };
 
@@ -89,10 +108,6 @@ router.get('/status', function(req, res) {
 	console.log('Called: /status');
 	console.log('TODO: Use this data intelligently in return.');
 	useDb(function(db, done) {
-		var cursor = db.collection('notifications').find({ });
-		cursor.each(function(err, doc) {
-			console.log(doc);
-		});
 	});
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.json(
