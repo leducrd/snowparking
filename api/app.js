@@ -58,8 +58,9 @@ var useDb = function(callback) {
 		}
 		// this calls the function that I wrote down below to retrieve the record with the subject line we are looking for.
 		assert.equal(null, err );
-		findLatestUpdate(db, function() { db.close(); });	
+		findLatestUpdate(db, function() { db.close(); });
 	});
+
 };
 
 router.get('/', function(req, res) {
@@ -108,6 +109,12 @@ router.get('/status', function(req, res) {
 	console.log('Called: /status');
 	console.log('TODO: Use this data intelligently in return.');
 	res.setHeader('Access-Control-Allow-Origin', '*');
+	useDb(function(db, done) {
+		var cursor = db.collection('notifications').find({ });
+			cursor.each(function(err, doc) {
+			console.log(doc);
+		});
+	});
 	res.json(
 		[
 			{
@@ -123,7 +130,6 @@ router.get('/status', function(req, res) {
 		][getRandomInt(0, 1)]
 	);
 });
-
 router.get('/schedule', function(req, res) {
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.json(
